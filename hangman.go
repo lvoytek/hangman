@@ -32,10 +32,33 @@ import (
 func main() {
 	stages := ExtractGallows("default.gallows")
 	currentWord := ChooseWord(ExtractDictionary("words.txt"))
-	fmt.Println(currentWord)
-
 	var guessedLetters []string
-	PrintStage(currentWord, guessedLetters, stages)
+	var nextGuess string
+
+	isLowercaseWord := regexp.MustCompile(`^[a-z]+$`).MatchString
+
+	for !PrintStage(currentWord, guessedLetters, stages) {
+		fmt.Print("Guess> ")
+		fmt.Scanln(&nextGuess)
+
+		// Add letters in nextGuess to guessed letters
+		if isLowercaseWord(nextGuess) {
+			for _, c := range nextGuess {
+				letterAlreadyGuessed := false
+
+				for _, guess := range guessedLetters {
+					if string(c) == guess {
+						letterAlreadyGuessed = true
+						break
+					}
+				}
+
+				if !letterAlreadyGuessed {
+					guessedLetters = append(guessedLetters, string(c))
+				}
+			}
+		}
+	}
 }
 
 // PrintStage displays the current state of the game in the terminal. This
