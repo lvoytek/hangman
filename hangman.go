@@ -13,11 +13,123 @@ import (
 
 func main() {
 	stages := ExtractGallows("default.gallows")
-
-	fmt.Println(stages[5])
-
 	currentWord := ChooseWord(ExtractDictionary("words.txt"))
 	fmt.Println(currentWord)
+
+	var guessedLetters []string
+	PrintStage(currentWord, guessedLetters, stages)
+}
+
+// PrintStage displays the current state of the game in the terminal. This
+// includes the current body parts, the gallows, the word outline, and all
+// guessed letters. The function returns true if the game has finished, and
+// false otherwise
+func PrintStage(currentWord string, guessedLetters []string, gallows []string) bool {
+	// Get all the bad letter guesses
+	var badGuesses []string
+	for _, c := range guessedLetters {
+		if !strings.Contains(currentWord, c) {
+			badGuesses = append(badGuesses, c)
+		}
+	}
+
+	// Split current gallows string into individual lines
+	stageLines := strings.Split(gallows[min(len(badGuesses), len(gallows)-1)], "\n")
+
+	// Get the longest line of the stage to offset the bad guess box from
+	badGuessOffset := 0
+
+	for _, stageLine := range stageLines {
+		if len(stageLine) > badGuessOffset {
+			badGuessOffset = len(stageLine)
+		}
+	}
+
+	badGuessOffset += 3
+
+	if len(stageLines) >= 6 {
+		startBadGuessesLine := (len(stageLines) - 6) / 2
+
+		for i, stageLine := range stageLines {
+			if i >= startBadGuessesLine && i < startBadGuessesLine+6 {
+				fmt.Print(stageLine)
+				fmt.Print(strings.Repeat(" ", (badGuessOffset - len(stageLine))))
+
+				if i == startBadGuessesLine {
+					fmt.Println(" ___________________")
+				} else if i == startBadGuessesLine+5 {
+					fmt.Println("|___________________|")
+				} else {
+					fmt.Print("| ")
+
+					startIndex := (i - startBadGuessesLine - 1) * 9
+
+					for i := startIndex; i < startIndex+9; i++ {
+						if i < len(badGuesses) {
+							fmt.Print(badGuesses[i] + " ")
+						} else {
+							fmt.Print("  ")
+						}
+					}
+
+					fmt.Println("|")
+				}
+
+			} else {
+				fmt.Println(stageLine)
+			}
+		}
+
+	} else {
+		//TODO Make guess printing work for smaller gallows
+	}
+
+	// Print guessed letters and the word outline
+	fmt.Println()
+
+	wordComplete := true
+
+	for _, c := range currentWord {
+		letterGuessed := false
+
+		for _, guess := range guessedLetters {
+			if string(c) == guess {
+				letterGuessed = true
+				break
+			}
+		}
+
+		if letterGuessed {
+			fmt.Print(string(c))
+		} else {
+			wordComplete = false
+			fmt.Print(" ")
+		}
+	}
+
+	fmt.Println()
+	fmt.Println(strings.Repeat("-", len(currentWord)))
+
+	// Print win or loss screen if game over
+	if len(badGuesses) >= len(gallows) {
+		PrintLoseScreen()
+		return true
+	}
+
+	if wordComplete {
+		PrintWinScreen()
+		return true
+	}
+
+	return false
+}
+
+func PrintWinScreen() {
+
+}
+
+func PrintLoseScreen() {
+
 }
 
 // ExtractGallows returns a set of stages that the gallows and body can be in
@@ -91,4 +203,11 @@ func ExtractDictionary(dictionaryFile string) []string {
 	}
 
 	return outputWords
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
