@@ -30,13 +30,27 @@ import (
 )
 
 func main() {
-	stages := ExtractGallows("default.gallows")
-	currentWord := ChooseWord(ExtractDictionary("words.txt"))
+	// Show help if requested
+	if sendHelp(os.Args) {
+		return
+	}
+
+	// Get the gallows and dictionary for this game
+	stages := ExtractGallows(getGallowsFromArgs(os.Args))
+	dict := ExtractDictionary(getDictionaryFromArgs(os.Args))
+
+	if stages == nil || dict == nil {
+		return
+	}
+
+	currentWord := ChooseWord(dict)
+
 	var guessedLetters []string
 	var nextGuess string
 
 	isLowercaseWord := regexp.MustCompile(`^[a-z]+$`).MatchString
 
+	// Play the game
 	for !PrintStage(currentWord, guessedLetters, stages) {
 		fmt.Print("Guess> ")
 		fmt.Scanln(&nextGuess)
@@ -87,6 +101,10 @@ func PrintStage(currentWord string, guessedLetters []string, gallows []string) b
 	}
 
 	badGuessOffset += 3
+
+	for i := 0; i < 10; i++ {
+		fmt.Println()
+	}
 
 	if len(stageLines) >= 6 {
 		startBadGuessesLine := (len(stageLines) - 6) / 2
@@ -152,7 +170,7 @@ func PrintStage(currentWord string, guessedLetters []string, gallows []string) b
 	fmt.Println(strings.Repeat("-", len(currentWord)))
 
 	// Print win or loss screen if game over
-	if len(badGuesses) >= len(gallows) {
+	if len(badGuesses) >= len(gallows)-1 {
 		PrintLoseScreen()
 		return true
 	}
@@ -246,9 +264,62 @@ func ExtractDictionary(dictionaryFile string) []string {
 	return outputWords
 }
 
+// min gets the minimum value between two integers
 func min(a, b int) int {
 	if a < b {
 		return a
 	}
 	return b
+}
+
+func getGallowsFromArgs(args []string) string {
+	checkNextItem := false
+	gallowsFile := "default.gallows"
+
+	for _, arg := range args {
+		if checkNextItem {
+			gallowsFile = arg
+		} else if arg == "--gallows" || arg == "-g" {
+			checkNextItem = true
+		}
+	}
+
+	return gallowsFile
+}
+
+func getDictionaryFromArgs(args []string) string {
+	checkNextItem := false
+	dictFile := "words.txt"
+
+	for _, arg := range args {
+		if checkNextItem {
+			dictFile = arg
+		} else if arg == "--dictionary" || arg == "-d" {
+			checkNextItem = true
+		}
+	}
+
+	return dictFile
+}
+
+// sendHelp displays the help section if requested in the arguments.
+// It returns true if the help screen was shown
+func sendHelp(args []string) bool {
+	helpNeeded := false
+
+	for _, arg := range args {
+		if arg == "--help" || arg == "-h" {
+			helpNeeded = true
+			break
+		}
+	}
+
+	if helpNeeded {
+		fmt.Println("Options:")
+		fmt.Println("\t-d, --dictionary [filename]\tProvide a custom dictionary file, which is a set of lowercase words split up by new lines")
+		fmt.Println("\t-g, --gallows [filename]\tProvide a custom gallows and body progression design, which is a set of stages separated by two new lines")
+		fmt.Println("\t-h, --help\t\t\tPrint this screen")
+	}
+
+	return helpNeeded
 }
