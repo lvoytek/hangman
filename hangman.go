@@ -171,7 +171,7 @@ func PrintStage(currentWord string, guessedLetters []string, gallows []string) b
 
 	// Print win or loss screen if game over
 	if len(badGuesses) >= len(gallows)-1 {
-		PrintLoseScreen()
+		PrintLoseScreen(currentWord)
 		return true
 	}
 
@@ -184,11 +184,21 @@ func PrintStage(currentWord string, guessedLetters []string, gallows []string) b
 }
 
 func PrintWinScreen() {
-
+	fmt.Println("__  __               _       ___")
+	fmt.Println("\\ \\/ /___  __  __   | |     / (_)___")
+	fmt.Println(" \\  / __ \\/ / / /   | | /| / / / __ \\")
+	fmt.Println(" / / /_/ / /_/ /    | |/ |/ / / / / /")
+	fmt.Println("/_/\\____/\\__,_/     |__/|__/_/_/ /_/")
 }
 
-func PrintLoseScreen() {
-
+func PrintLoseScreen(word string) {
+	fmt.Println("__  __               __")
+	fmt.Println("\\ \\/ /___  __  __   / /   ____  ________")
+	fmt.Println(" \\  / __ \\/ / / /  / /   / __ \\/ ___/ _ \\")
+	fmt.Println(" / / /_/ / /_/ /  / /___/ /_/ (__  )  __/")
+	fmt.Println("/_/\\____/\\__,_/  /_____/\\____/____/\\___/")
+	fmt.Println()
+	fmt.Println("The word was: " + word)
 }
 
 // ExtractGallows returns a set of stages that the gallows and body can be in
