@@ -55,11 +55,13 @@ func main() {
 		fmt.Print("Guess> ")
 		fmt.Scanln(&nextGuess)
 
-		// Add letters in nextGuess to guessed letters
-		if isLowercaseWord(nextGuess) {
-			for _, c := range nextGuess {
-				letterAlreadyGuessed := false
+		nextGuess = strings.ToLower(nextGuess)
 
+		// Add letters in nextGuess to guessed letters
+		for _, c := range nextGuess {
+			letterAlreadyGuessed := false
+
+			if isLowercaseWord(string(c)) {
 				for _, guess := range guessedLetters {
 					if string(c) == guess {
 						letterAlreadyGuessed = true
